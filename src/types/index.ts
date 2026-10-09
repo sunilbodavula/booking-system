@@ -24,3 +24,16 @@ export interface Booking {
   status: 'CONFIRMED' | 'CANCELLED';
   created_at: Date;
 }
+
+export interface ResourceInput {
+  name: string;
+  description?: string | null;
+  capacity?: number;
+}
+
+export interface CreateBookingInput {
+  user_id: number;
+  resource_id: number;
+  start_time: string;
+  end_time: string;
+}
