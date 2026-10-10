@@ -30,7 +30,7 @@ export const updateResource = async (id: number, input: ResourceInput): Promise<
     validate(input);
     const updated = await resourceRepo.updateResouce(id, input);
     if(!updated){
-        throw new HttpError(404, 'Resource ${id} not found');
+        throw new HttpError(404, `Resource ${id} not found`);
     }
     return updated;
 };
@@ -38,6 +38,6 @@ export const updateResource = async (id: number, input: ResourceInput): Promise<
 export const deleteResource = async (id: number) : Promise<void> => {
     const deleted = await resourceRepo.deleteResource(id);
     if(!deleted){
-        throw new HttpError(404, 'Resource ${id} not found');
+        throw new HttpError(404, `Resource ${id} not found`);
     }
 }
