@@ -25,15 +25,4 @@ export interface Booking {
   created_at: Date;
 }
 
-export interface ResourceInput {
-  name: string;
-  description?: string | null;
-  capacity?: number;
-}
-
-export interface CreateBookingInput {
-  user_id: number;
-  resource_id: number;
-  start_time: string;
-  end_time: string;
-}
+export type { ResourceInput, CreateBookingInput } from '../validation/schema';

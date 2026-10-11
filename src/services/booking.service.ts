@@ -15,29 +15,12 @@ export const getBookingById = async (id: number): Promise<Booking> => {
 }
 
 export const createBooking = async (input: CreateBookingInput): Promise<Booking> => {
-    const {user_id, resource_id, start_time, end_time} = input;
-
-    if(!Number.isInteger(user_id) || !Number.isInteger(resource_id)){
-        throw new HttpError(400, 'User ID and Resource ID must be valid integers');
+    if(!(await findUserById(input.user_id))){
+        throw new HttpError(404, `User ${input.user_id} not found`);
     }
 
-    if(typeof start_time !== 'string' || typeof end_time !== 'string'){
-        throw new HttpError(400, 'Start time and end time are required (ISO date-time strings)');
-    }
-
-    const start = new Date(start_time);
-    const end = new Date(end_time);
-
-    if(end <= start){
-        throw new HttpError(400, 'End time must be after start time');
-    }
-
-    if(!(await findUserById(user_id))){
-        throw new HttpError(404, `User ${user_id} not found`);
-    }
-
-    if(!(await findResourceById(resource_id))){
-        throw new HttpError(404, `Resource ${resource_id} not found`);
+    if(!(await findResourceById(input.resource_id))){
+        throw new HttpError(404, `Resource ${input.resource_id} not found`);
     }
 
     return bookingRepo.createBooking(input);

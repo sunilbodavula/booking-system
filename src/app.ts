@@ -14,6 +14,9 @@ app.use('/api', healthRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/bookings', bookingRoutes);
 
+app.use((req, res) => {
+    res.status(404).json({status: 404, message: `Route ${req.method} ${req.originalUrl} not found`});
+})
 app.use(errorHandler);
 
 export default app;

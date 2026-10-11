@@ -8,7 +8,16 @@ export const errorHandler = (
     _next: NextFunction
 ): void => {
     if (err instanceof HttpError) {
-        res.status(err.statusCode).json({ status: err.statusCode, message: err.message });
+        res.status(err.statusCode).json({ 
+            status: err.statusCode, 
+            message: err.message,
+            ...(err.details !== undefined ? {errors: err.details} : {}),
+        });
+        return;
+    }
+
+    if((err as {type?: string}).type === 'entity.parse.failed'){
+        res.status(400).json({status: 400, message: "Malformed JSON in Request body"});
         return;
     }
 
