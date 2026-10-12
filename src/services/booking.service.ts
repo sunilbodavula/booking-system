@@ -1,10 +1,16 @@
 import * as bookingRepo from '../repository/booking.repository';
 import { findUserById } from '../repository/user.repository';
 import { findResourceById } from '../repository/resource.repository';
-import { CreateBookingInput, Booking } from '../types';
+import { CreateBookingInput, Booking, BookingListQuery, PaginatedResult } from '../types';
 import { HttpError } from '../utils/HttpError';
+import { toPage } from '../utils/pagination';
 
-export const getAllBookings = async (): Promise<Booking[]> => bookingRepo.findAllBookings();
+//export const getAllBookings = async (): Promise<Booking[]> => bookingRepo.findAllBookings();
+export const listBookings = async (query: BookingListQuery): Promise<PaginatedResult<Booking>> => {
+    const { page, limit, sort, order, ...filters } = query;
+    const { rows, total } = await bookingRepo.findBookingsPage(filters, sort, order, limit, (page - 1) * limit);
+    return toPage(rows, total, page, limit);
+}
 
 export const getBookingById = async (id: number): Promise<Booking> => {
     const booking = await bookingRepo.findBookingById(id);

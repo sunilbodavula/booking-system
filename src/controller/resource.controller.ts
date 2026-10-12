@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import * as resourceService from '../services/resource.service';
 import { parseId } from '../utils/parseId';
+import { ResourceListQuery } from '../types';
 
-export const getAllResources = async (req: Request, res: Response): Promise<void> => {
-    res.json(await resourceService.getAllResource());
+export const getAllResources = async (_req: Request, res: Response): Promise<void> => {
+    res.json(await resourceService.listResource(res.locals.query as ResourceListQuery))
 }
 
 export const getResourceById = async (req: Request, res: Response): Promise<void> => {

@@ -1,8 +1,14 @@
 import * as resourceRepo from '../repository/resource.repository';
-import { ResourceInput, Resource } from '../types';
+import { ResourceInput, Resource, PaginatedResult, ResourceListQuery } from '../types';
 import { HttpError } from '../utils/HttpError';
+import {toPage} from '../utils/pagination'
 
-export const getAllResource = async (): Promise<Resource[]> => resourceRepo.findAllResources();
+//export const getAllResource = async (): Promise<Resource[]> => resourceRepo.findAllResources();
+export const listResource = async (query: ResourceListQuery): Promise<PaginatedResult<Resource>> => {
+    const { page, limit, sort, order, ...filters} = query;
+    const { rows, total } = await resourceRepo.findResourcesPage(filters, sort, order, limit, (page - 1) * limit);
+    return toPage(rows, total, page, limit);
+}
 
 export const getResourceById = async (id: number): Promise<Resource> => {
     const resource = await resourceRepo.findResourceById(id);

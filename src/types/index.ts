@@ -25,4 +25,19 @@ export interface Booking {
   created_at: Date;
 }
 
-export type { ResourceInput, CreateBookingInput } from '../validation/schema';
+export type { 
+  ResourceInput, 
+  CreateBookingInput,
+  ResourceListQuery,
+  BookingListQuery
+} from '../validation/schema';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}

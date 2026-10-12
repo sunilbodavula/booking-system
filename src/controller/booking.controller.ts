@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import * as bookingService from '../services/booking.service';
 import { parseId } from '../utils/parseId';
+import { BookingListQuery } from '../types';
 
-export const getAllBookings = async (req: Request, res: Response): Promise<void> => {
-    res.json(await bookingService.getAllBookings());
+export const getAllBookings = async (_req: Request, res: Response): Promise<void> => {
+    res.json(await bookingService.listBookings(res.locals.query as BookingListQuery));
 }
 
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {

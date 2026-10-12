@@ -28,3 +28,38 @@ export const createBookingSchema = z
 
 export type ResourceInput = z.infer<typeof resourceSchema>;
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
+
+const pagination = {
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+};
+
+export const resourceListQuerySchema = z
+.object({
+    ...pagination,
+    search: z.string().trim().min(1).max(100).optional(),
+    min_capacity: z.coerce.number().int().min(1).optional(),
+    sort: z.enum(['id', 'name', 'capacity', 'created_at']).default('id'),
+    order: z.enum(['asc', 'desc']).default('asc'),
+})
+.strict();
+
+export const bookingListQuerySchema = z
+.object({
+    ...pagination,
+    resource_id: z.coerce.number().int().positive().optional(),
+    user_id: z.number().int().positive().optional(),
+    status: z.enum(['CONFIRMED', 'CANCELLED']).optional(),
+    from: isoDateTime.optional(),
+    to: isoDateTime.optional(),
+    sort: z.enum(['id', 'start_time', 'end_time', 'created_at']).default('start_time'),
+    order: z.enum(['asc', 'desc']).default('asc'),
+})
+.strict()
+.refine((q) => !q.from || !q.to || new Date(q.to) > new Date(q.from),{
+    message: 'to must be after from',
+    path: ['to'],
+});
+
+export type ResourceListQuery = z.infer<typeof resourceListQuerySchema>;
+export type BookingListQuery = z.infer<typeof bookingListQuerySchema>;
