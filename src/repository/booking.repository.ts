@@ -18,12 +18,12 @@ export const findBookingById = async (id: number): Promise<Booking | null> => {
     return result.rows[0] ?? null;
 }
 
-export const createBooking = async (input: CreateBookingInput): Promise<Booking> => {
+export const createBooking = async (userId: number, input: CreateBookingInput): Promise<Booking> => {
     const result = await pool.query<Booking>(
         `INSERT INTO bookings (user_id, resource_id, start_time, end_time)
         VALUES ($1, $2, $3, $4)
         RETURNING *`,
-        [input.user_id, input.resource_id, input.start_time, input.end_time]
+        [userId, input.resource_id, input.start_time, input.end_time]
     );
     return result.rows[0];
 }

@@ -41,3 +41,19 @@ export interface PaginatedResult<T> {
     totalPages: number;
   };
 }
+
+export type  Role = 'ADMIN' | 'USER';
+
+export interface AuthUser {
+  id: number;
+  role: Role;
+}
+
+export type PublicUser = Pick<User, 'id' | 'name' | 'email' | 'role' | 'created_at'>;
+
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: 'Bearer';
+  expiresIn: number;
+} 

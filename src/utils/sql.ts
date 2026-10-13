@@ -8,7 +8,7 @@ export class WhereBuilder {
     }
 
     toSql(): string {
-        return this.clauses.length > 0 ? `WHERE ${this.clauses.join('AND')}` : '';
+        return this.clauses.length > 0 ? `WHERE ${this.clauses.join(' AND ')}` : '';
     }
 }
 

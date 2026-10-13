@@ -15,7 +15,6 @@ export const resourceSchema = z
 
 export const createBookingSchema = z
 .object({
-    user_id: z.number().int().positive(),
     resource_id: z.number().int().positive(),
     start_time: isoDateTime,
     end_time: isoDateTime,
@@ -63,3 +62,32 @@ export const bookingListQuerySchema = z
 
 export type ResourceListQuery = z.infer<typeof resourceListQuerySchema>;
 export type BookingListQuery = z.infer<typeof bookingListQuerySchema>;
+
+const withinBcryptLimit = (value: string): boolean => Buffer.byteLength(value, 'utf8') <= 72;
+
+export const registerSchema = z
+.object({
+    name: z.string().trim().min(1, 'name is required').max(255),
+    email: z.string().trim().toLowerCase().email('email must be valid').max(255),
+    password: z
+        .string()
+        .min(8, 'password must be at least 8 characters')
+        .refine(withinBcryptLimit, 'password must be at most 72 bytes'),
+})
+.strict();
+
+export const loginSchema = z
+.object({
+    email: z.string().trim().toLowerCase().email('email must be valid'),
+    password: z.string().min(1, 'password is required').refine(withinBcryptLimit, 'password is too long'),
+})
+.strict();
+
+export const refreshSchema = z
+.object({
+    refreshToken: z.string().min(1, 'refreshToken is required').max(255),
+})
+.strict();
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;

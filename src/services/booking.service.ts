@@ -20,16 +20,16 @@ export const getBookingById = async (id: number): Promise<Booking> => {
     return booking;
 }
 
-export const createBooking = async (input: CreateBookingInput): Promise<Booking> => {
-    if(!(await findUserById(input.user_id))){
-        throw new HttpError(404, `User ${input.user_id} not found`);
+export const createBooking = async (userId: number, input: CreateBookingInput): Promise<Booking> => {
+    if(!(await findUserById(userId))){
+        throw new HttpError(404, `User ${userId} not found`);
     }
 
     if(!(await findResourceById(input.resource_id))){
         throw new HttpError(404, `Resource ${input.resource_id} not found`);
     }
 
-    return bookingRepo.createBooking(input);
+    return bookingRepo.createBooking(userId, input);
 }
 
 export const cancelBooking = async (id: number): Promise<Booking> => {
