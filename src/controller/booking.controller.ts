@@ -5,12 +5,12 @@ import { BookingListQuery } from '../types';
 import { getAuthUser } from '../middleware/authenticate';
 
 export const getAllBookings = async (_req: Request, res: Response): Promise<void> => {
-    res.json(await bookingService.listBookings(res.locals.query as BookingListQuery));
+    res.json(await bookingService.listBookings(res.locals.query as BookingListQuery, getAuthUser(res)));
 }
 
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    res.json(await bookingService.getBookingById(parseId(id)));
+    res.json(await bookingService.getBookingById(parseId(id), getAuthUser(res)));
 }
 
 export const createBooking = async (req: Request, res: Response): Promise<void> => {
@@ -20,6 +20,6 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
 
 export const cancelBooking = async (req: Request, res: Response): Promise<void> => {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const cancelled = await bookingService.cancelBooking(parseId(id));
+    const cancelled = await bookingService.cancelBooking(parseId(id), getAuthUser(res));
     res.json(cancelled);
 }

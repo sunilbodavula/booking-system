@@ -6,6 +6,7 @@ import { PublicUser, TokenPair, User } from '../types';
 import { LoginInput, RegisterInput } from '../validation/schema';
 import { HttpError } from '../utils/HttpError';
 import { generateRefreshToken, hashToken, signAccessToken } from '../utils/token';
+import { Queryable, withTransaction } from '../db/transaction';
 
 const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', env.bcryptCost);
 
@@ -17,7 +18,7 @@ const toPublicUser = (user: User): PublicUser => ({
     created_at: user.created_at,
 });
 
-const issueTokens = async (user: User): Promise<TokenPair> => {
+const issueTokens = async (user: User, db?: Queryable): Promise<TokenPair> => {
     const refreshToken = generateRefreshToken();
     const expiresAt = new Date(Date.now() + env.refreshTokenTtlDays * 24 * 60 * 60 * 1000);
     await tokenRepo.saveRefreshToken(user.id, hashToken(refreshToken), expiresAt);
@@ -36,8 +37,14 @@ export const register = async (input: RegisterInput): Promise<{user: PublicUser}
     }
 
     const passwordHash = await bcrypt.hash(input.password, env.bcryptCost);
-    const user = await createUser(input.name, input.email, passwordHash);
-    return {user: toPublicUser(user), ...(await issueTokens(user))};
+
+    const { user, tokens } = await withTransaction(async (client) => {
+        const created = await createUser(input.name, input.email, passwordHash, client);
+        const issued = await issueTokens(created, client);
+        return {user: created, tokens: issued}
+    })
+
+    return {user: toPublicUser(user), ...tokens};
 };
 
 export const login = async (input: LoginInput): Promise<{user: PublicUser} & TokenPair> => {
