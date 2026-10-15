@@ -1,8 +1,18 @@
 import { z } from 'zod';
 
+const OFFSET_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?(Z|[+-]\d{2}:\d{2})$/;
+
 const isoDateTime = z
 .string()
-.refine((value) => !isNaN(Date.parse(value)), "must be a valid ISO date-time, e.g. 2026-10-20T10:00:00");
+.regex(OFFSET_DATETIME, 'must be an ISO date-time with a timezone, e.g. 2026-10-20T10:00:00+05:30 or 2026-10-20T04:30:00Z')
+.transform((value, ctx) => {
+    const date = new Date(value);
+    if(Number.isNaN(date.getTime())){
+        ctx.addIssue({code: 'custom', message: 'must be a valid date-time'});
+        return z.NEVER;
+    }
+    return date.toISOString();
+});
 
 
 export const resourceSchema = z

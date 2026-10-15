@@ -39,6 +39,19 @@ export const errorHandler = (
     res.status(400).json({ status: 400, message: 'Invalid input format' });
     return;
   }
+  if (pgCode === '23P01'){
+    res.status(409).json({
+        status: 409,
+        message: 'The resource is already booked for part or all of that time',
+    })
+    return;
+  }
+
+  if (pgCode === '40P01' || pgCode === '40001') {
+    res.setHeader('Retry-After', '1');
+    res.status(503).json({ status: 503, message: 'The request conflicted with another one. Please try again.' });
+    return;
+  }
 
   console.error(err);
   res.status(500).json({ status: 500, message: 'Internal server error' });

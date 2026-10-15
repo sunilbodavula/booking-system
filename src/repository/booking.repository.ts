@@ -2,13 +2,9 @@ import pool from '../config/db';
 import { Booking, CreateBookingInput } from '../types/index';
 import { BookingListQuery } from '../types/index';
 import { WhereBuilder } from '../utils/sql';
+import { withTransaction } from '../db/transaction';
 
-// export const findAllBookings = async (): Promise<Booking[]> => {
-//     const result = await pool.query<Booking>(
-//         'SELECT * FROM bookings ORDER BY start_time'
-//     );
-//     return result.rows;
-// }
+const BOOKING_LOCK_NAMESPACE = 1;
 
 export const findBookingById = async (id: number): Promise<Booking | null> => {
     const result = await pool.query<Booking>(
@@ -18,16 +14,23 @@ export const findBookingById = async (id: number): Promise<Booking | null> => {
     return result.rows[0] ?? null;
 }
 
-export const createBooking = async (userId: number, input: CreateBookingInput): Promise<Booking> => {
-    const result = await pool.query<Booking>(
-        `INSERT INTO bookings (user_id, resource_id, start_time, end_time)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *`,
-        [userId, input.resource_id, input.start_time, input.end_time]
+export const createBooking = async (userId: number, input: CreateBookingInput): Promise<Booking> =>
+  withTransaction(async (client) => {
+    await client.query('SELECT pg_advisory_xact_lock($1::int, $2::int)', [
+      BOOKING_LOCK_NAMESPACE,
+      input.resource_id,
+    ]);
+
+    const result = await client.query<Booking>(
+      `INSERT INTO bookings (user_id, resource_id, start_time, end_time)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [userId, input.resource_id, input.start_time, input.end_time]
     );
     return result.rows[0];
-}
+  });
 
+  
 export const cancelBooking = async (id: number): Promise<Booking | null> => {
     const result = await pool.query<Booking>(
         `UPDATE bookings
