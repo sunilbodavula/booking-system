@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import http from 'http';
 import app from './app';
 import pool from './config/db';
+import { initSocket } from './realtime/socket';
 
 const PORT: number = Number(process.env.PORT) || 3000;
 
@@ -14,6 +16,9 @@ pool.query('SELECT NOW()', (err: Error | null) => {
         console.log('Database connection verified');
     }
 })
+
+const httpServer = http.createServer(app);
+initSocket(httpServer);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

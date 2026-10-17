@@ -4,6 +4,7 @@ import { findResourceById } from '../repository/resource.repository';
 import { CreateBookingInput, Booking, BookingListQuery, PaginatedResult, AuthUser } from '../types';
 import { HttpError } from '../utils/HttpError';
 import { toPage } from '../utils/pagination';
+import { emitBookingCancelled, emitBookingCreated } from '../realtime/socket';
 
 const canAccess = (booking: Booking, actor: AuthUser): boolean => 
     actor.role === 'ADMIN' || booking.user_id === actor.id;
@@ -32,15 +33,12 @@ export const getBookingById = async (id: number, actor: AuthUser): Promise<Booki
 }
 
 export const createBooking = async (userId: number, input: CreateBookingInput): Promise<Booking> => {
-    if(!(await findUserById(userId))){
-        throw new HttpError(404, `User ${userId} not found`);
-    }
-
     if(!(await findResourceById(input.resource_id))){
         throw new HttpError(404, `Resource ${input.resource_id} not found`);
     }
-
-    return bookingRepo.createBooking(userId, input);
+    const booking = await bookingRepo.createBooking(userId, input);
+    emitBookingCreated(booking.resource_id, booking);
+    return booking;
 }
 
 export const cancelBooking = async (id: number, actor: AuthUser): Promise<Booking> => {
@@ -53,5 +51,6 @@ export const cancelBooking = async (id: number, actor: AuthUser): Promise<Bookin
     if(!cancelled){
         throw new HttpError(404, `Booking ${id} not found`);
     }
+    emitBookingCancelled(cancelled.resource_id, cancelled.id);
     return cancelled;
 }
