@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { validate } from '../middleware/validate';
 import { authenticate } from '../middleware/authenticate';
 import { registerSchema, loginSchema, refreshSchema } from '../validation/schema';
+import { authLimiter } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -12,8 +13,8 @@ router.use((_req, res, next) => {
   next();
 });
 
-router.post('/register', validate(registerSchema), asyncHandler(controller.register));
-router.post('/login', validate(loginSchema), asyncHandler(controller.login));
+router.post('/register', authLimiter, validate(registerSchema), asyncHandler(controller.register));
+router.post('/login', authLimiter,  validate(loginSchema), asyncHandler(controller.login));
 router.post('/refresh', validate(refreshSchema), asyncHandler(controller.refresh));
 router.post('/logout', validate(refreshSchema), asyncHandler(controller.logout));
 router.get('/me', authenticate, asyncHandler(controller.me));

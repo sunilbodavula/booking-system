@@ -7,10 +7,13 @@ import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth.routes';
 import { authenticate } from './middleware/authenticate';
 
+import { globalLimiter } from './middleware/rateLimit';
+
 const app: Application = express();
 
 app.use(cors());
 app.use(express.json({ limit: '10kb' }));
+app.use(globalLimiter);
 
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);

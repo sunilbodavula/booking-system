@@ -23,6 +23,8 @@ export const resourceSchema = z
 })
 .strict();
 
+const MAX_FUTURE_YEARS = 2
+
 export const createBookingSchema = z
 .object({
     resource_id: z.number().int().positive(),
@@ -34,6 +36,16 @@ export const createBookingSchema = z
     message: "End time must be after start time",
     path: ["end_time"],
 })
+.refine(
+    (data) => new Date(data.start_time) > new Date(), {
+        message: "Start time must be in the future",
+        path: ['start_time'],
+    }
+)
+.refine(
+    (data) => new Date(data.start_time) < new Date(Date.now() + MAX_FUTURE_YEARS * 365 * 24 * 60 * 60 * 1000),
+    {message: `Start time must be within ${MAX_FUTURE_YEARS} years`, path: ['start_time']}
+);
 
 export type ResourceInput = z.infer<typeof resourceSchema>;
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
