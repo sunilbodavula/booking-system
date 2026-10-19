@@ -21,7 +21,7 @@ const toPublicUser = (user: User): PublicUser => ({
 const issueTokens = async (user: User, db?: Queryable): Promise<TokenPair> => {
     const refreshToken = generateRefreshToken();
     const expiresAt = new Date(Date.now() + env.refreshTokenTtlDays * 24 * 60 * 60 * 1000);
-    await tokenRepo.saveRefreshToken(user.id, hashToken(refreshToken), expiresAt);
+    await tokenRepo.saveRefreshToken(user.id, hashToken(refreshToken), expiresAt, db);
 
     return {
         accessToken: signAccessToken(user),

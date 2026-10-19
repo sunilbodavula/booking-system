@@ -5,12 +5,15 @@ const handler = (): never => {
     throw new HttpError(429, 'Too many requests, Please try again later.');
 };
 
+const skipInTest = (): boolean => process.env.NODE_ENV === 'test';
+
 export const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 10,
     standardHeaders: true,
     legacyHeaders: false,
     handler,
+    skip: skipInTest,
 });
 
 export const bookingWriteLimiter = rateLimit({
@@ -19,6 +22,7 @@ export const bookingWriteLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     handler,
+    skip: skipInTest,
 })
 
 export const globalLimiter = rateLimit({
@@ -27,4 +31,5 @@ export const globalLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     handler,
+    skip: skipInTest,
 })

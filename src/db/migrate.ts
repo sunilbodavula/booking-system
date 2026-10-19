@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import pool from '../config/db';
 import { withTransaction } from './transaction';
-import { endsWith } from 'zod';
 
 const MIGRATION_DIR = path.join(__dirname, 'migrations');
 
